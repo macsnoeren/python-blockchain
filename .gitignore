@@ -7,3 +7,5 @@ venv/
 /*.egg-info
 /build
 /.eggs
+
+examples/*.id

@@ -20,6 +20,8 @@ class BlockchainNode(Node):
 
         self.id = BlockchainId(file_blockchain_id)
 
+        print(self.id.is_valid())
+
         print(self.id.get_id())
 
         super(BlockchainNode, self).__init__(host, port, self.id.get_id())
