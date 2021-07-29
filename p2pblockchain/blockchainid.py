@@ -37,6 +37,9 @@ class BlockchainId:
             self.create_file_blockchain_id()
 
     def read_file_blockchain_id(self):
+        '''This method reads the blockchain id file to get the information. The file is
+            encrypted, so the user needs to provide the password to unlock the file. When
+            successfull, the method returns True, otherwise False.'''
         try:
             f = open(self.file_blockchain_id, "r")
             salt      = base64.b64decode( f.readline() )
@@ -50,7 +53,7 @@ class BlockchainId:
             decrypted = unpad( cipher.decrypt(encrypted), AES.block_size )
 
             self.data = json.loads(decrypted)
-            print(self.data)
+            return True
 
         except FileNotFoundError:
             print("read_file_blockchain_id: The file is not present.")
@@ -58,14 +61,21 @@ class BlockchainId:
         except:
             print("read_file_blockchain_id: Wrong password?!")
 
+        return False
+
     def create_file_blockchain_id(self):
+        '''When no blockchain id file exist, the file needs to be created. All the 
+           initial information is created for the user. The created file is protected
+           by a password that is provided by the user. Make sure, it is a strong 
+           password and that you do not lose it!'''
+
         print("You need to create your wallet for the blockchain.")
         name = input("What is your name: ")
         password1 = getpass.getpass("Enter a password to protect your identification: ")
         password2 = getpass.getpass("Re-enter your password: ")
 
         if password1 != password2:
-            print("Password do not match!")
+            print("Passwords do not match!")
             
         else:
             # Derive a key from the password to increase entropy!
@@ -89,25 +99,34 @@ class BlockchainId:
         except Exception as e:
             print("create_file_blockchain_id: Writing file failed: " + str(e))
 
-    def create_key(self):
+    def create_key(self, type='ECC-P-256'):
+        '''Generic method to creata a key. Default ECC-P-256! Nothing else is implemented at this
+           moment. Default behavior is to create a key with the highest security. This class uses
+           the method to create al the necessary keys for encryption and signing purposes.'''
         key = ECC.generate(curve='P-256')
-        return { "type": "ECC-256", "PEM": key.export_key(format='PEM') }
+        return { "type": "ECC-P-256", "PEM": key.export_key(format='PEM') }
 
     def get_signing_key(self):
+        '''Returns the private and public key that has been generated for the signing process.'''
         return ECC.import_key(self.data["key_signing"]["PEM"]) # TODO: Only implemented type is ECC-256, but this should be checked.
 
     def get_signing_key_public(self):
+        '''Returns only the public key that has been generated for the signing process.'''
         key = self.get_signing_key()
-        return key.public_key().export_key(format='PEM')
+        return key.public_key()#.export_key(format='PEM')
 
     def get_encryption_key(self):
+        '''Returns the private and public key that has been generated for the encryption process.'''
         return ECC.import_key(self.data["key_encryption"]["PEM"]) # TODO: Only implemented type is ECC-256, but this should be checked.
 
     def get_encryption_key_public(self):
+        '''Returns only the public key that has been generated for the encryption process.'''
         key = self.get_encryption_key()
-        return key.public_key().export_key(format='PEM')
+        return key.public_key()#.export_key(format='PEM')
 
     def sign_message(self, message):
+        '''Sign the given message with the generated key for the signing process.
+           TODO: If the message is a dict it should be transformed based on alphabet => new method hash_message(self, message)'''
         key = self.get_signing_key()
         h = SHA256.new(message)
         signer = DSS.new(key, 'fips-186-3')
@@ -115,6 +134,7 @@ class BlockchainId:
         return base64.b64encode(signature).decode('utf-8')
 
     def verify_signature(self, message, signature, key):
+        '''Verify the signature based on the message, signature and public key.'''
         signature = base64.b64decode(signature)
         h = SHA256.new(message)
         verifier = DSS.new(key, 'fips-186-3')
@@ -126,8 +146,20 @@ class BlockchainId:
         except ValueError:
             return False
 
+    def get_public_identification(self):
+        '''Returns the public information that everybody should know. It should be
+           on the blockchain as well.'''
+        return { "created": self.data["created"],
+                 "name": self.data["name"],
+                 "id": self.data["id"],
+                 "key_signing": self.get_signing_key_public().export_key(format='PEM'),
+                 "key_encryption": self.get_encryption_key_public().export_key(format='PEM')
+                }
+
     def is_valid(self):
+        '''Returns True when the identification is valid, otherwise False.'''
         return "id" in self.data
 
     def get_id(self):
+        '''Returns the id assiociated with the current identification (or user).'''
         return self.data["id"]

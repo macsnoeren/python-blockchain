@@ -22,6 +22,12 @@ class BlockchainNode(Node):
 
         print(self.id.is_valid())
 
+        message = b'Hoi, ik ben Maurice'
+        signature = self.id.sign_message(message)
+        print(self.id.verify_signature(message, signature, self.id.get_signing_key_public()))
+        print(self.id.get_encryption_key_public())
+        print(self.id.get_public_identification())
+
         print(self.id.get_id())
 
         super(BlockchainNode, self).__init__(host, port, self.id.get_id())
