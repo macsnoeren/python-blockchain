@@ -8,6 +8,7 @@ import getpass
 # pip install pycryptodome
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
+from Crypto.PublicKey import ECC
 
 """
 Author: Maurice Snoeren <macsnoeren(at)gmail.com>
@@ -71,7 +72,7 @@ class BlockchainId:
             timestamp = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
             id        = hashlib.sha3_512( bytes( str(salt)+str(key)+str(timestamp)+str(name), 'utf-8') ).hexdigest()
 
-            self.data = { "created": timestamp, "name": name, "id": id }
+            self.data = { "created": timestamp, "name": name, "id": id, "key_signing": self.create_key(), "key_encryption": self.create_key() }
 
             cipher    = AES.new(key, AES.MODE_CBC)
             encrypted = cipher.encrypt(pad(bytes( json.dumps(self.data), 'utf-8'), AES.block_size))
@@ -85,6 +86,10 @@ class BlockchainId:
             
         except Exception as e:
             print("create_file_blockchain_id: Writing file failed: " + str(e))
+
+    def create_key(self):
+        key = ECC.generate(curve='P-256')
+        return { "type": "ECC-256", "PEM": key.export_key(format='PEM') }
 
     def is_valid(self):
         return "id" in self.data
