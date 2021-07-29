@@ -9,6 +9,8 @@ import getpass
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from Crypto.PublicKey import ECC
+from Crypto.Hash import SHA256
+from Crypto.Signature import DSS
 
 """
 Author: Maurice Snoeren <macsnoeren(at)gmail.com>
@@ -90,6 +92,39 @@ class BlockchainId:
     def create_key(self):
         key = ECC.generate(curve='P-256')
         return { "type": "ECC-256", "PEM": key.export_key(format='PEM') }
+
+    def get_signing_key(self):
+        return ECC.import_key(self.data["key_signing"]["PEM"]) # TODO: Only implemented type is ECC-256, but this should be checked.
+
+    def get_signing_key_public(self):
+        key = self.get_signing_key()
+        return key.public_key().export_key(format='PEM')
+
+    def get_encryption_key(self):
+        return ECC.import_key(self.data["key_encryption"]["PEM"]) # TODO: Only implemented type is ECC-256, but this should be checked.
+
+    def get_encryption_key_public(self):
+        key = self.get_encryption_key()
+        return key.public_key().export_key(format='PEM')
+
+    def sign_message(self, message):
+        key = self.get_signing_key()
+        h = SHA256.new(message)
+        signer = DSS.new(key, 'fips-186-3')
+        signature = signer.sign(h)
+        return base64.b64encode(signature).decode('utf-8')
+
+    def verify_signature(self, message, signature, key):
+        signature = base64.b64decode(signature)
+        h = SHA256.new(message)
+        verifier = DSS.new(key, 'fips-186-3')
+
+        try:
+            verifier.verify(h, signature)
+            return True
+
+        except ValueError:
+            return False
 
     def is_valid(self):
         return "id" in self.data
