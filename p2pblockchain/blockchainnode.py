@@ -1,9 +1,3 @@
-import socket
-import time
-import threading
-import random
-import hashlib
-
 from p2pnetwork.node import Node
 from p2pblockchain.blockchainid import BlockchainId
 
@@ -19,17 +13,8 @@ class BlockchainNode(Node):
         """BlockchainNode constructor."""
 
         self.id = BlockchainId(file_blockchain_id)
-
-        print(self.id.is_valid())
-
-        message = {"name": "Maurice", "test": "kashda"}
-        signature = self.id.sign_message(message)
-        print(self.id.verify_signature(message, signature, self.id.get_signing_key_public()))
-        print(self.id.get_encryption_key_public())
-        print(self.id.get_public_identification())
-        print(self.id.encrypt_message(b'askldjasldkjasd'))
-
-        print(self.id.get_id())
+        while ( not self.id.is_valid() ):
+            self.id = BlockchainId(file_blockchain_id)
 
         super(BlockchainNode, self).__init__(host, port, self.id.get_id())
         print("BlockchainNode: Started")

@@ -55,8 +55,10 @@ class BlockchainId:
             key       = hashlib.scrypt(bytes(password, 'utf-8'), salt=salt, n=1024, r=8, p=1, dklen=32) # derive a 32 byte key = 256 bit
             cipher    = AES.new(key, AES.MODE_CBC, iv=iv)
             decrypted = unpad( cipher.decrypt(encrypted), AES.block_size )
-
             self.data = json.loads(decrypted)
+
+            print("Welcome back " + self.data["name"] + "!")
+
             return True
 
         except FileNotFoundError:
@@ -93,15 +95,19 @@ class BlockchainId:
             cipher    = AES.new(key, AES.MODE_CBC)
             encrypted = cipher.encrypt(pad(bytes( json.dumps(self.data), 'utf-8'), AES.block_size))
 
-        try:
-            f = open(self.file_blockchain_id, "w")
-            f.write( str(base64.b64encode(salt).decode('utf-8')) + "\n" )
-            f.write( str(base64.b64encode(cipher.iv).decode('utf-8')) + "\n" )
-            f.write( str(base64.b64encode(encrypted).decode('utf-8')) + "\n" )
-            f.close()
-            
-        except Exception as e:
-            print("create_file_blockchain_id: Writing file failed: " + str(e))
+            try:
+                f = open(self.file_blockchain_id, "w")
+                f.write( str(base64.b64encode(salt).decode('utf-8')) + "\n" )
+                f.write( str(base64.b64encode(cipher.iv).decode('utf-8')) + "\n" )
+                f.write( str(base64.b64encode(encrypted).decode('utf-8')) + "\n" )
+                f.close()
+
+                return True
+                
+            except Exception as e:
+                print("create_file_blockchain_id: Writing file failed: " + str(e))
+
+        return False
 
     def create_key(self, type='ECC-P-256'):
         '''Generic method to creata a key. Default ECC-P-256! Nothing else is implemented at this
@@ -164,14 +170,15 @@ class BlockchainId:
     def encrypt_message(self, message):
         '''TODO: Encryption is not possible with this library with ECC. Some shared key should be derived
            to perform encryption with AES for example. This needs to be designed :S!'''
-        key1 = self.get_encryption_key()
-        key2 = self.get_signing_key()
+        #key1 = self.get_encryption_key()
+        #key2 = self.get_signing_key()
 
-        shared1 = key1. * key2.public_key()
-        shared2 = key2 * key1.public_key()
+        #shared1 = key1. * key2.public_key()
+        #shared2 = key2 * key1.public_key()
 
-        print(shared1)
-        print(shared2)
+        #print(shared1)
+        #print(shared2)
+        pass
 
     def get_public_identification(self):
         '''Returns the public information that everybody should know. It should be
