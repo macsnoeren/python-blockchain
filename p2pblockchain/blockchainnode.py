@@ -22,11 +22,12 @@ class BlockchainNode(Node):
 
         print(self.id.is_valid())
 
-        message = b'Hoi, ik ben Maurice'
+        message = {"name": "Maurice", "test": "kashda"}
         signature = self.id.sign_message(message)
         print(self.id.verify_signature(message, signature, self.id.get_signing_key_public()))
         print(self.id.get_encryption_key_public())
         print(self.id.get_public_identification())
+        print(self.id.encrypt_message(b'askldjasldkjasd'))
 
         print(self.id.get_id())
 

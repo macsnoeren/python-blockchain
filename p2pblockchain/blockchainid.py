@@ -5,8 +5,12 @@ import hashlib
 import base64
 import getpass
 
-# pip install pycryptodome
-from Crypto.Cipher import AES
+# pip install tinyec
+from tinyec import registry
+
+# pip install pycryptodome: https://pycryptodome.readthedocs.io/en/latest/src/cipher/cipher.html
+# Interessant: https://cryptobook.nakov.com/asymmetric-key-ciphers/ecc-encryption-decryption
+from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.Util.Padding import pad, unpad
 from Crypto.PublicKey import ECC
 from Crypto.Hash import SHA256
@@ -113,7 +117,7 @@ class BlockchainId:
     def get_signing_key_public(self):
         '''Returns only the public key that has been generated for the signing process.'''
         key = self.get_signing_key()
-        return key.public_key()#.export_key(format='PEM')
+        return key.public_key()
 
     def get_encryption_key(self):
         '''Returns the private and public key that has been generated for the encryption process.'''
@@ -122,13 +126,24 @@ class BlockchainId:
     def get_encryption_key_public(self):
         '''Returns only the public key that has been generated for the encryption process.'''
         key = self.get_encryption_key()
-        return key.public_key()#.export_key(format='PEM')
+        return key.public_key()
+
+    def hash_message(self, message):
+        '''This function is able to hash all message types that is given. Normally a str
+           or a dict will be hashed. It produces always the same hash when the same data
+           is provided!'''
+        if type(message) is dict:
+            message = json.dumps(message, sort_keys=True)
+        else:
+            if type(message) is not str:
+                message = str(message)
+        
+        return SHA256.new(message.encode('utf-8'))
 
     def sign_message(self, message):
-        '''Sign the given message with the generated key for the signing process.
-           TODO: If the message is a dict it should be transformed based on alphabet => new method hash_message(self, message)'''
+        '''Sign the given message with the generated key for the signing process.'''
         key = self.get_signing_key()
-        h = SHA256.new(message)
+        h = self.hash_message(message)
         signer = DSS.new(key, 'fips-186-3')
         signature = signer.sign(h)
         return base64.b64encode(signature).decode('utf-8')
@@ -136,7 +151,7 @@ class BlockchainId:
     def verify_signature(self, message, signature, key):
         '''Verify the signature based on the message, signature and public key.'''
         signature = base64.b64decode(signature)
-        h = SHA256.new(message)
+        h = self.hash_message(message)
         verifier = DSS.new(key, 'fips-186-3')
 
         try:
@@ -145,6 +160,18 @@ class BlockchainId:
 
         except ValueError:
             return False
+
+    def encrypt_message(self, message):
+        '''TODO: Encryption is not possible with this library with ECC. Some shared key should be derived
+           to perform encryption with AES for example. This needs to be designed :S!'''
+        key1 = self.get_encryption_key()
+        key2 = self.get_signing_key()
+
+        shared1 = key1. * key2.public_key()
+        shared2 = key2 * key1.public_key()
+
+        print(shared1)
+        print(shared2)
 
     def get_public_identification(self):
         '''Returns the public information that everybody should know. It should be
