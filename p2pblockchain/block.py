@@ -22,12 +22,12 @@ Version: 0.1 beta (use at your own risk)
 Date: 30-07-2021
 """
 
-class Blockchain:
+class Block:
 
     def __init__(self, dir_blockchain="blockchain"):
-        """Blockchain constructor. This class implements the blockchain ledger with all the blocks."""
+        """Block constructor. This class implements one block with all the transactions."""
 
-        self.blocks = {}
+        self.transactions = {}
 
         #if os.path.isfile(file_blockchain_id):
         #    self.read_file_blockchain_id()
