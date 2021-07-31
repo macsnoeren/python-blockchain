@@ -27,11 +27,13 @@ class Blockchain:
     def __init__(self, dir_blockchain="blockchain"):
         """Blockchain constructor. This class implements the blockchain ledger with all the blocks."""
 
-        self.blocks = {}
+        self.blockchain = []
 
-        #if os.path.isfile(file_blockchain_id):
-        #    self.read_file_blockchain_id()
+        self.blockchain_file = dir_blockchain + "/blockchain.dat"
 
-        #else:
-        #    self.create_file_blockchain_id()
+        if os.path.isfile(self.blockchain_file):
+            self.read_blockchain_file
+
+    def read_blockchain_file(self):
+        pass
 

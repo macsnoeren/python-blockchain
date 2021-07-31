@@ -16,6 +16,8 @@ from Crypto.PublicKey import ECC
 from Crypto.Hash import SHA256
 from Crypto.Signature import DSS
 
+from p2pblockchain.transaction import Transaction
+
 """
 Author: Maurice Snoeren <macsnoeren(at)gmail.com>
 Version: 0.1 beta (use at your own risk)
@@ -90,7 +92,7 @@ class BlockchainId:
             timestamp = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
             id        = hashlib.sha3_512( bytes( str(salt)+str(key)+str(timestamp)+str(name), 'utf-8') ).hexdigest()
 
-            self.data = { "created": timestamp, "name": name, "id": id, "key_signing": self.create_key(), "key_encryption": self.create_key() }
+            self.data = { "created": timestamp, "name": name, "id": id, "key_signing": self.create_key(), "key_encryption": self.create_key(), "public": False }
 
             cipher    = AES.new(key, AES.MODE_CBC)
             encrypted = cipher.encrypt(pad(bytes( json.dumps(self.data), 'utf-8'), AES.block_size))
@@ -197,3 +199,13 @@ class BlockchainId:
     def get_id(self):
         '''Returns the id assiociated with the current identification (or user).'''
         return self.data["id"]
+
+    def is_public(self):
+        '''When it is public, the id has been send to the network to put on the blockchain. Only
+           public identifications can participate the blockchain network.'''
+        return self.data["public"]
+
+    def get_participant_transaction(self):
+        transaction = Transaction(self.get_id(), "participant", self.get_public_identification())
+        transaction.sign_transaction( self.sign_message(transaction.transaction) )
+        return transaction

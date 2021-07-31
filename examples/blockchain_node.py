@@ -19,11 +19,13 @@ parser.add_argument("--wallet", "-w", help="The file that stores the blockchain 
 args = parser.parse_args()
 
 node = BlockchainNode(file_blockchain_id=args.wallet)
+print(node.blockchain_id)
+print(node.blockchain_id.get_participant_transaction())
 
-node.start()
+#node.start()
 
-time.sleep(5)
+#time.sleep(5)
 
-node.stop()
+#node.stop()
 
 print('end test')

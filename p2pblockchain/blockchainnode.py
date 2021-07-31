@@ -12,11 +12,11 @@ class BlockchainNode(Node):
     def __init__(self, file_blockchain_id="blockchain.id", host="localhost", port=8000):
         """BlockchainNode constructor."""
 
-        self.id = BlockchainId(file_blockchain_id)
-        while ( not self.id.is_valid() ):
-            self.id = BlockchainId(file_blockchain_id)
+        self.blockchain_id = BlockchainId(file_blockchain_id)
+        while ( not self.blockchain_id.is_valid() ):
+            self.blockchain_id = BlockchainId(file_blockchain_id)
 
-        super(BlockchainNode, self).__init__(host, port, self.id.get_id())
+        super(BlockchainNode, self).__init__(host, port, self.blockchain_id.get_id())
         print("BlockchainNode: Started")
 
     def outbound_node_connected(self, node):

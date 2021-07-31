@@ -1,5 +1,5 @@
 import os
-import datetime
+from datetime import datetime, timezone
 import json
 import hashlib
 import base64
@@ -24,14 +24,26 @@ Date: 30-07-2021
 
 class Transaction:
 
-    def __init__(self, dir_blockchain="blockchain"):
-        """Transaction constructor. This class implements one transaction that changes the state of the blockchain."""
+    def __init__(self, initiator, t="transaction", data={}):
+        """This class implements one transaction that changes the state of the blockchain."""
 
-        self.chain = {} #?!
+        self.transaction_types = ["participant", "smartcontract", "transaction"]
 
-        #if os.path.isfile(file_blockchain_id):
-        #    self.read_file_blockchain_id()
+        if not t in self.transaction_types:
+            raise NameError("Transaction type can only be participant, smartcontract or transaction.")
 
-        #else:
-        #    self.create_file_blockchain_id()
+        if not type(data) is dict:
+            raise TypeError("Transaction data must be of type dict.")
 
+        self.transaction = {
+            "initiator"    : initiator,
+            "data"         : data,
+            "type"         : t,
+            "timestamp"    : datetime.now(timezone.utc).isoformat(),
+        }
+
+        # Create an id of the transaction
+        self.transaction["id"] = SHA256.new( json.dumps(self.transaction, sort_keys=True).encode('utf-8') ).hexdigest()
+
+    def sign_transaction(self, signature):
+        self.transaction["signature"] = signature

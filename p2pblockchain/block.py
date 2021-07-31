@@ -24,14 +24,32 @@ Date: 30-07-2021
 
 class Block:
 
-    def __init__(self, dir_blockchain="blockchain"):
+    def __init__(self, dir_blockchain="blockchain", consensus_algorithm=None):
         """Block constructor. This class implements one block with all the transactions."""
 
-        self.transactions = {}
+        self.block = {
+            "hash_previous_block": "",
+            "transactions"       : [],
+            #timestamp    = "" # This should be always added when the block is closed
+            #nonce        = "" # This should be is added by the consensus algo
+            "hash"        : "" # This should be is added by the consensus algo
+        }
 
-        #if os.path.isfile(file_blockchain_id):
-        #    self.read_file_blockchain_id()
+        self.consensus_algorithm = consensus_algorithm
 
-        #else:
-        #    self.create_file_blockchain_id()
+        if ( self.consensus_algorithm == None ):
+            pass # Create here a the deafaul consesnus algorithm
 
+    def update_block_hash(self):
+        if "hash" in self.block:
+            del self.block["hash"]
+
+        line = json.dumps(self.block, sort_keys=True)
+        hash = SHA256.new(line.encode('utf-8'))
+        self.block["hash"] = hash
+
+        return hash
+
+    def add_transaction(self, transaction):
+        self.block["transaction"].append(transaction.transaction)
+        self.update_block_hash()
