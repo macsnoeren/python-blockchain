@@ -1,5 +1,8 @@
 from p2pnetwork.node import Node
+
 from p2pblockchain.blockchainid import BlockchainId
+from p2pblockchain.blockchain import Blockchain
+from p2pblockchain.proofofwork import ProofOfWork
 
 """
 Author: Maurice Snoeren <macsnoeren(at)gmail.com>
@@ -9,12 +12,17 @@ Date: 26-06-2021
 
 class BlockchainNode(Node):
 
-    def __init__(self, file_blockchain_id="blockchain.id", host="localhost", port=8000):
+    def __init__(self, file_blockchain_id="blockchain.id", host="localhost", port=8000, consensus_algorithm=None):
         """BlockchainNode constructor."""
 
         self.blockchain_id = BlockchainId(file_blockchain_id)
         while ( not self.blockchain_id.is_valid() ):
             self.blockchain_id = BlockchainId(file_blockchain_id)
+
+        if consensus_algorithm == None:
+            consensus_algorithm = ProofOfWork()
+
+        self.blockchain = Blockchain(consensus_algorithm=consensus_algorithm)
 
         super(BlockchainNode, self).__init__(host, port, self.blockchain_id.get_id())
         print("BlockchainNode: Started")

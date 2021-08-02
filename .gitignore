@@ -9,3 +9,5 @@ venv/
 /.eggs
 
 examples/*.id
+
+blockchain

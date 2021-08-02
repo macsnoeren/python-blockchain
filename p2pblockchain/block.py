@@ -16,6 +16,8 @@ from Crypto.PublicKey import ECC
 from Crypto.Hash import SHA256
 from Crypto.Signature import DSS
 
+from p2pblockchain.transaction import Transaction
+
 """
 Author: Maurice Snoeren <macsnoeren(at)gmail.com>
 Version: 0.1 beta (use at your own risk)
@@ -24,21 +26,23 @@ Date: 30-07-2021
 
 class Block:
 
-    def __init__(self, dir_blockchain="blockchain", consensus_algorithm=None):
+    def __init__(self, block=None, previous_block=None, transactions=[]):
         """Block constructor. This class implements one block with all the transactions."""
 
         self.block = {
-            "hash_previous_block": "",
-            "transactions"       : [],
-            #timestamp    = "" # This should be always added when the block is closed
-            #nonce        = "" # This should be is added by the consensus algo
-            "hash"        : "" # This should be is added by the consensus algo
+            "hash_previous_block": 0x00,
+            "transactions"       : transactions,
+            "height"             : 0
         }
 
-        self.consensus_algorithm = consensus_algorithm
+        if previous_block != None:
+            self.block["hash_previous_block"] = previous_block.block["hash"]
+            self.block["height"]              = previous_block.block["height"] + 1
 
-        if ( self.consensus_algorithm == None ):
-            pass # Create here a the deafaul consesnus algorithm
+        if block != None:
+            self.block = block
+
+        self.update_block_hash()
 
     def update_block_hash(self):
         if "hash" in self.block:
@@ -46,10 +50,17 @@ class Block:
 
         line = json.dumps(self.block, sort_keys=True)
         hash = SHA256.new(line.encode('utf-8'))
-        self.block["hash"] = hash
+        self.block["hash"] = hash.hexdigest()
 
         return hash
 
     def add_transaction(self, transaction):
-        self.block["transaction"].append(transaction.transaction)
+        self.block["transactions"].append(transaction.transaction)
         self.update_block_hash()
+
+    def check_block(self):
+        # TODO: check the hash_previous_block, transaction array and height and check the hash
+        return True
+
+    def __str__(self):
+        return "Block: \n" + json.dumps(self.block, sort_keys=True, indent=2)

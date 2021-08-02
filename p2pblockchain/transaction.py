@@ -47,3 +47,6 @@ class Transaction:
 
     def sign_transaction(self, signature):
         self.transaction["signature"] = signature
+
+    def __str__(self):
+        return "Transaction: \n" + json.dumps(self.transaction, sort_keys=True, indent=2)
