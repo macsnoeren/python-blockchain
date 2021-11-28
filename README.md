@@ -1,3 +1,5 @@
+_work in progress_
+
 # Module python-blockchain
 
 Blockchain is a very promosing combination of technologies. Providing a ledger system that can be trusted. This kind of technologies we need for the future, to become more resilient against cyber crime and identity theft. While blockchain already shown us good usage, like crypto coins and smart contract, it is still under development. The current implementation of most blockchains require large computing power to solve the difficult digital puzzles to provide trust. A lot of pools provide these computing power. It uses a lot of energy and is not sustainable for the future. Another drawback is the speed of the blockchain. A lot of things to fix. Blockchain can still become one of the technologies the Internet will be based upon. Up to a better and safer digital world!
