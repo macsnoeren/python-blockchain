@@ -24,11 +24,11 @@ class Block:
             "height": 0
         }
 
-        if previous_block != None:
+        if previous_block is not None:
             self.block["hash_previous_block"] = previous_block.block["hash"]
             self.block["height"] = previous_block.block["height"] + 1
 
-        if block != None:
+        if block is not None:
             self.block = block
 
         self.update_block_hash()
