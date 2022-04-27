@@ -22,6 +22,7 @@ Version: 0.1 beta (use at your own risk)
 Date: 30-07-2021
 """
 
+
 class Transaction:
 
     def __init__(self, initiator, t="transaction", data={}):
@@ -36,14 +37,14 @@ class Transaction:
             raise TypeError("Transaction data must be of type dict.")
 
         self.transaction = {
-            "initiator"    : initiator,
-            "data"         : data,
-            "type"         : t,
-            "timestamp"    : datetime.now(timezone.utc).isoformat(),
+            "initiator": initiator,
+            "data": data,
+            "type": t,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         # Create an id of the transaction
-        self.transaction["id"] = SHA256.new( json.dumps(self.transaction, sort_keys=True).encode('utf-8') ).hexdigest()
+        self.transaction["id"] = SHA256.new(json.dumps(self.transaction, sort_keys=True).encode('utf-8')).hexdigest()
 
     def sign_transaction(self, signature):
         self.transaction["signature"] = signature

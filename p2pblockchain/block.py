@@ -24,6 +24,7 @@ Version: 0.1 beta (use at your own risk)
 Date: 30-07-2021
 """
 
+
 class Block:
 
     def __init__(self, block=None, previous_block=None, transactions=[]):
@@ -31,13 +32,13 @@ class Block:
 
         self.block = {
             "hash_previous_block": 0x00,
-            "transactions"       : transactions,
-            "height"             : 0
+            "transactions": transactions,
+            "height": 0
         }
 
         if previous_block != None:
             self.block["hash_previous_block"] = previous_block.block["hash"]
-            self.block["height"]              = previous_block.block["height"] + 1
+            self.block["height"] = previous_block.block["height"] + 1
 
         if block != None:
             self.block = block

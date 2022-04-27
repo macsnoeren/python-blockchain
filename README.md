@@ -19,18 +19,18 @@ A blockchain requires a basic functionality. The following basic functionality w
 
 ## Starting a blockchain node
 
-It is easy to start a blockchain node. The following code creates a single node. 
+It is easy to start a blockchain node. The following code creates a single node.
 
 ```python
-from p2pblockchain.blockchainnode import BlockchainNode
+from p2pblockchain.blockchain_node import BlockchainNode
 
 node = BlockchainNode()
 
 node.start()
 
-while 1==1:
-    sleep(1000)
-    # Do something
+while 1 == 1:
+  sleep(1000)
+  # Do something
 ```
 
 

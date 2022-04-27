@@ -1,28 +1,28 @@
-import os
-import datetime
-import json
-import hashlib
 import base64
+import datetime
 import getpass
-
-# pip install tinyec??
-from tinyec import registry
+import hashlib
+import json
+import os
 
 # pip install pycryptodome: https://pycryptodome.readthedocs.io/en/latest/src/cipher/cipher.html
 # Interessant: https://cryptobook.nakov.com/asymmetric-key-ciphers/ecc-encryption-decryption
-from Crypto.Cipher import AES, PKCS1_OAEP
-from Crypto.Util.Padding import pad, unpad
-from Crypto.PublicKey import ECC
+from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
+from Crypto.PublicKey import ECC
 from Crypto.Signature import DSS
+from Crypto.Util.Padding import pad, unpad
 
 from p2pblockchain.transaction import Transaction
+
+# pip install tinyec??
 
 """
 Author: Maurice Snoeren <macsnoeren(at)gmail.com>
 Version: 0.1 beta (use at your own risk)
 Date: 26-06-2021
 """
+
 
 class BlockchainId:
 
@@ -48,15 +48,16 @@ class BlockchainId:
             successfull, the method returns True, otherwise False.'''
         try:
             f = open(self.file_blockchain_id, "r")
-            salt      = base64.b64decode( f.readline() )
-            iv        = base64.b64decode( f.readline() )
-            encrypted = base64.b64decode( f.readline() )
+            salt = base64.b64decode(f.readline())
+            iv = base64.b64decode(f.readline())
+            encrypted = base64.b64decode(f.readline())
             f.close()
 
-            password  = getpass.getpass("Enter the password to open your wallet: ")
-            key       = hashlib.scrypt(bytes(password, 'utf-8'), salt=salt, n=1024, r=8, p=1, dklen=32) # derive a 32 byte key = 256 bit
-            cipher    = AES.new(key, AES.MODE_CBC, iv=iv)
-            decrypted = unpad( cipher.decrypt(encrypted), AES.block_size )
+            password = getpass.getpass("Enter the password to open your wallet: ")
+            key = hashlib.scrypt(bytes(password, 'utf-8'), salt=salt, n=1024, r=8, p=1,
+                                 dklen=32)  # derive a 32 byte key = 256 bit
+            cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+            decrypted = unpad(cipher.decrypt(encrypted), AES.block_size)
             self.data = json.loads(decrypted)
 
             print("Welcome back " + self.data["name"] + "!")
@@ -84,28 +85,30 @@ class BlockchainId:
 
         if password1 != password2:
             print("Passwords do not match!")
-            
+
         else:
             # Derive a key from the password to increase entropy!
-            salt      = os.urandom(32)
-            key       = hashlib.scrypt(bytes(password1, 'utf-8'), salt=salt, n=1024, r=8, p=1, dklen=32) # derive a 32 byte key = 256 bit
+            salt = os.urandom(32)
+            key = hashlib.scrypt(bytes(password1, 'utf-8'), salt=salt, n=1024, r=8, p=1,
+                                 dklen=32)  # derive a 32 byte key = 256 bit
             timestamp = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-            id        = hashlib.sha3_512( bytes( str(salt)+str(key)+str(timestamp)+str(name), 'utf-8') ).hexdigest()
+            id = hashlib.sha3_512(bytes(str(salt) + str(key) + str(timestamp) + str(name), 'utf-8')).hexdigest()
 
-            self.data = { "created": timestamp, "name": name, "id": id, "key_signing": self.create_key(), "key_encryption": self.create_key(), "public": False }
+            self.data = {"created": timestamp, "name": name, "id": id, "key_signing": self.create_key(),
+                         "key_encryption": self.create_key(), "public": False}
 
-            cipher    = AES.new(key, AES.MODE_CBC)
-            encrypted = cipher.encrypt(pad(bytes( json.dumps(self.data), 'utf-8'), AES.block_size))
+            cipher = AES.new(key, AES.MODE_CBC)
+            encrypted = cipher.encrypt(pad(bytes(json.dumps(self.data), 'utf-8'), AES.block_size))
 
             try:
                 f = open(self.file_blockchain_id, "w")
-                f.write( str(base64.b64encode(salt).decode('utf-8')) + "\n" )
-                f.write( str(base64.b64encode(cipher.iv).decode('utf-8')) + "\n" )
-                f.write( str(base64.b64encode(encrypted).decode('utf-8')) + "\n" )
+                f.write(str(base64.b64encode(salt).decode('utf-8')) + "\n")
+                f.write(str(base64.b64encode(cipher.iv).decode('utf-8')) + "\n")
+                f.write(str(base64.b64encode(encrypted).decode('utf-8')) + "\n")
                 f.close()
 
                 return True
-                
+
             except Exception as e:
                 print("create_file_blockchain_id: Writing file failed: " + str(e))
 
@@ -116,11 +119,12 @@ class BlockchainId:
            moment. Default behavior is to create a key with the highest security. This class uses
            the method to create al the necessary keys for encryption and signing purposes.'''
         key = ECC.generate(curve='P-256')
-        return { "type": "ECC-P-256", "PEM": key.export_key(format='PEM') }
+        return {"type": "ECC-P-256", "PEM": key.export_key(format='PEM')}
 
     def get_signing_key(self):
         '''Returns the private and public key that has been generated for the signing process.'''
-        return ECC.import_key(self.data["key_signing"]["PEM"]) # TODO: Only implemented type is ECC-256, but this should be checked.
+        return ECC.import_key(
+            self.data["key_signing"]["PEM"])  # TODO: Only implemented type is ECC-256, but this should be checked.
 
     def get_signing_key_public(self):
         '''Returns only the public key that has been generated for the signing process.'''
@@ -129,7 +133,8 @@ class BlockchainId:
 
     def get_encryption_key(self):
         '''Returns the private and public key that has been generated for the encryption process.'''
-        return ECC.import_key(self.data["key_encryption"]["PEM"]) # TODO: Only implemented type is ECC-256, but this should be checked.
+        return ECC.import_key(
+            self.data["key_encryption"]["PEM"])  # TODO: Only implemented type is ECC-256, but this should be checked.
 
     def get_encryption_key_public(self):
         '''Returns only the public key that has been generated for the encryption process.'''
@@ -145,7 +150,7 @@ class BlockchainId:
         else:
             if type(message) is not str:
                 message = str(message)
-        
+
         return SHA256.new(message.encode('utf-8'))
 
     def sign_message(self, message):
@@ -172,24 +177,24 @@ class BlockchainId:
     def encrypt_message(self, message):
         '''TODO: Encryption is not possible with this library with ECC. Some shared key should be derived
            to perform encryption with AES for example. This needs to be designed :S!'''
-        #key1 = self.get_encryption_key()
-        #key2 = self.get_signing_key()
+        # key1 = self.get_encryption_key()
+        # key2 = self.get_signing_key()
 
-        #shared1 = key1. * key2.public_key()
-        #shared2 = key2 * key1.public_key()
+        # shared1 = key1. * key2.public_key()
+        # shared2 = key2 * key1.public_key()
 
-        #print(shared1)
-        #print(shared2)
+        # print(shared1)
+        # print(shared2)
         pass
 
     def get_public_identification(self):
         '''Returns the public information that everybody should know. It should be
            on the blockchain as well.'''
-        return { "created": self.data["created"],
-                 "name": self.data["name"],
-                 "id": self.data["id"],
-                 "key_signing": self.get_signing_key_public().export_key(format='PEM'),
-                 "key_encryption": self.get_encryption_key_public().export_key(format='PEM')
+        return {"created": self.data["created"],
+                "name": self.data["name"],
+                "id": self.data["id"],
+                "key_signing": self.get_signing_key_public().export_key(format='PEM'),
+                "key_encryption": self.get_encryption_key_public().export_key(format='PEM')
                 }
 
     def is_valid(self):
@@ -207,5 +212,5 @@ class BlockchainId:
 
     def get_participant_transaction(self):
         transaction = Transaction(self.get_id(), "participant", self.get_public_identification())
-        transaction.sign_transaction( self.sign_message(transaction.transaction) )
+        transaction.sign_transaction(self.sign_message(transaction.transaction))
         return transaction
