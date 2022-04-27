@@ -43,9 +43,9 @@ class BlockchainId:
             self.create_file_blockchain_id()
 
     def read_file_blockchain_id(self):
-        '''This method reads the blockchain id file to get the information. The file is
+        """This method reads the blockchain id file to get the information. The file is
             encrypted, so the user needs to provide the password to unlock the file. When
-            successfull, the method returns True, otherwise False.'''
+            successfull, the method returns True, otherwise False."""
         try:
             f = open(self.file_blockchain_id, "r")
             salt = base64.b64decode(f.readline())
@@ -73,10 +73,10 @@ class BlockchainId:
         return False
 
     def create_file_blockchain_id(self):
-        '''When no blockchain id file exist, the file needs to be created. All the 
+        """When no blockchain id file exist, the file needs to be created. All the
            initial information is created for the user. The created file is protected
-           by a password that is provided by the user. Make sure, it is a strong 
-           password and that you do not lose it!'''
+           by a password that is provided by the user. Make sure, it is a strong
+           password and that you do not lose it!"""
 
         print("You need to create your wallet for the blockchain.")
         name = input("What is your name: ")
@@ -115,36 +115,36 @@ class BlockchainId:
         return False
 
     def create_key(self, type='ECC-P-256'):
-        '''Generic method to creata a key. Default ECC-P-256! Nothing else is implemented at this
+        """Generic method to creata a key. Default ECC-P-256! Nothing else is implemented at this
            moment. Default behavior is to create a key with the highest security. This class uses
-           the method to create al the necessary keys for encryption and signing purposes.'''
+           the method to create al the necessary keys for encryption and signing purposes."""
         key = ECC.generate(curve='P-256')
         return {"type": "ECC-P-256", "PEM": key.export_key(format='PEM')}
 
     def get_signing_key(self):
-        '''Returns the private and public key that has been generated for the signing process.'''
+        """Returns the private and public key that has been generated for the signing process."""
         return ECC.import_key(
             self.data["key_signing"]["PEM"])  # TODO: Only implemented type is ECC-256, but this should be checked.
 
     def get_signing_key_public(self):
-        '''Returns only the public key that has been generated for the signing process.'''
+        """Returns only the public key that has been generated for the signing process."""
         key = self.get_signing_key()
         return key.public_key()
 
     def get_encryption_key(self):
-        '''Returns the private and public key that has been generated for the encryption process.'''
+        """Returns the private and public key that has been generated for the encryption process."""
         return ECC.import_key(
             self.data["key_encryption"]["PEM"])  # TODO: Only implemented type is ECC-256, but this should be checked.
 
     def get_encryption_key_public(self):
-        '''Returns only the public key that has been generated for the encryption process.'''
+        """Returns only the public key that has been generated for the encryption process."""
         key = self.get_encryption_key()
         return key.public_key()
 
     def hash_message(self, message):
-        '''This function is able to hash all message types that is given. Normally a str
+        """This function is able to hash all message types that is given. Normally a str
            or a dict will be hashed. It produces always the same hash when the same data
-           is provided!'''
+           is provided!"""
         if type(message) is dict:
             message = json.dumps(message, sort_keys=True)
         else:
@@ -154,7 +154,7 @@ class BlockchainId:
         return SHA256.new(message.encode('utf-8'))
 
     def sign_message(self, message):
-        '''Sign the given message with the generated key for the signing process.'''
+        """Sign the given message with the generated key for the signing process."""
         key = self.get_signing_key()
         h = self.hash_message(message)
         signer = DSS.new(key, 'fips-186-3')
@@ -162,7 +162,7 @@ class BlockchainId:
         return base64.b64encode(signature).decode('utf-8')
 
     def verify_signature(self, message, signature, key):
-        '''Verify the signature based on the message, signature and public key.'''
+        """Verify the signature based on the message, signature and public key."""
         signature = base64.b64decode(signature)
         h = self.hash_message(message)
         verifier = DSS.new(key, 'fips-186-3')
@@ -175,8 +175,8 @@ class BlockchainId:
             return False
 
     def encrypt_message(self, message):
-        '''TODO: Encryption is not possible with this library with ECC. Some shared key should be derived
-           to perform encryption with AES for example. This needs to be designed :S!'''
+        """TODO: Encryption is not possible with this library with ECC. Some shared key should be derived
+           to perform encryption with AES for example. This needs to be designed :S!"""
         # key1 = self.get_encryption_key()
         # key2 = self.get_signing_key()
 
@@ -188,8 +188,8 @@ class BlockchainId:
         pass
 
     def get_public_identification(self):
-        '''Returns the public information that everybody should know. It should be
-           on the blockchain as well.'''
+        """Returns the public information that everybody should know. It should be
+           on the blockchain as well."""
         return {"created": self.data["created"],
                 "name": self.data["name"],
                 "id": self.data["id"],
@@ -198,16 +198,16 @@ class BlockchainId:
                 }
 
     def is_valid(self):
-        '''Returns True when the identification is valid, otherwise False.'''
+        """Returns True when the identification is valid, otherwise False."""
         return "id" in self.data
 
     def get_id(self):
-        '''Returns the id assiociated with the current identification (or user).'''
+        """Returns the id assiociated with the current identification (or user)."""
         return self.data["id"]
 
     def is_public(self):
-        '''When it is public, the id has been send to the network to put on the blockchain. Only
-           public identifications can participate the blockchain network.'''
+        """When it is public, the id has been send to the network to put on the blockchain. Only
+           public identifications can participate the blockchain network."""
         return self.data["public"]
 
     def get_participant_transaction(self):
