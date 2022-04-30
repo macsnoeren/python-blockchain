@@ -4,6 +4,7 @@ Version: 0.1 beta (use at your own risk)
 Date: 31-07-2021
 """
 
+
 class ConsensusAlgorithm:
 
     def __init__(self):

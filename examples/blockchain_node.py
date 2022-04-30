@@ -12,7 +12,7 @@ import time
 import argparse
 sys.path.insert(0, '..') # Import the files where the modules are located
 
-from p2pblockchain.blockchainnode import BlockchainNode
+from p2pblockchain.blockchain_node import BlockchainNode
 from p2pblockchain.block import Block
 
 parser = argparse.ArgumentParser()

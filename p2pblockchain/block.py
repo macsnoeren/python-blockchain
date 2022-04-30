@@ -1,28 +1,17 @@
-import os
-import datetime
 import json
-import hashlib
-import base64
-import getpass
-
-# pip install tinyec
-from tinyec import registry
 
 # pip install pycryptodome: https://pycryptodome.readthedocs.io/en/latest/src/cipher/cipher.html
 # Interessant: https://cryptobook.nakov.com/asymmetric-key-ciphers/ecc-encryption-decryption
-from Crypto.Cipher import AES, PKCS1_OAEP
-from Crypto.Util.Padding import pad, unpad
-from Crypto.PublicKey import ECC
 from Crypto.Hash import SHA256
-from Crypto.Signature import DSS
 
-from p2pblockchain.transaction import Transaction
+# pip install tinyec
 
 """
 Author: Maurice Snoeren <macsnoeren(at)gmail.com>
 Version: 0.1 beta (use at your own risk)
 Date: 30-07-2021
 """
+
 
 class Block:
 
@@ -31,15 +20,15 @@ class Block:
 
         self.block = {
             "hash_previous_block": 0x00,
-            "transactions"       : transactions,
-            "height"             : 0
+            "transactions": transactions,
+            "height": 0
         }
 
-        if previous_block != None:
+        if previous_block is not None:
             self.block["hash_previous_block"] = previous_block.block["hash"]
-            self.block["height"]              = previous_block.block["height"] + 1
+            self.block["height"] = previous_block.block["height"] + 1
 
-        if block != None:
+        if block is not None:
             self.block = block
 
         self.update_block_hash()
