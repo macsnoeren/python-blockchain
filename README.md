@@ -14,7 +14,7 @@ A blockchain requires a basic functionality. The following basic functionality w
 - The ledger of the blockchain is off course open and can hold anything you like. The basic ledger is implemented by the class Blockchain. This ledger contains the blocks, which is implemented by the class Block. The block contains transactions, which is implemented by Transaction. The Block class contains one or more transactions. Finally, the blockchain also requires a consensus algorithm. This could be a proof-of-work algorithm, like used by Bitcoin. It is also possible to use other types of consensus algorithms. The consensus algorithm will add some extra information to the block, like nonce value and a timestamp for example.
 - While the blockchain is able to support smart contract, it will already implement three types of transactions:
     1. A special transaction "participant" adds a participant to the blockchain. From this moment, the participant is known and is able to participate with the network.
-    2. A special transation "smartcontract", adds a smart contract to the blockchain. This smart contract can be used by the participant. Its methods can be called and result into transactions to change the state of the smart contract.
+    2. A special transaction  "smartcontract", adds a smart contract to the blockchain. This smart contract can be used by the participant. Its methods can be called and result into transactions to change the state of the smart contract.
     3. The normal transaction "transaction" is used to change data on the blockchain. It uses the smart contracts that has been published on the blockchain and executes the code. The result of this code is pushed to the blockchain using transactions.
 
 ## Starting a blockchain node
